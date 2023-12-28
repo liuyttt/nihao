@@ -1,0 +1,46 @@
+import requests
+
+def get_github_repo_contents(owner, repo, path=""):
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents"
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "Authorization": "token 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"  # 将YOUR_ACCESS_TOKEN替换为你的个人访问令牌
+    }
+    response = requests.get(url, headers=headers)
+
+    try:
+        response.raise_for_status()  # 检查请求是否成功
+
+        # 检查响应的内容类型是否为 JSON
+        if response.headers['Content-Type'] == 'application/json':
+            content_data = response.json()
+
+            # 处理返回的 JSON 数据
+            files = [item["name"] for item in content_data if item["type"] == "file"]
+            return files
+
+        else:
+            print(f"Unexpected content type: {response.headers['Content-Type']}")
+            print(f"Raw Response Content: {response.text}")
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+    except requests.exceptions.RequestException as err:
+        print(f"Request Error: {err}")
+
+# 用法示例
+owner = "jigish"
+repo = "slate"
+path = "https://github.com/jigish/slate"
+
+file_list = get_github_repo_contents(owner, repo, path)
+if file_list:
+    print("Files in the repository:")
+    for file_name in file_list:
+        print(file_name)
+else:
+    print("Failed to retrieve file list.")
